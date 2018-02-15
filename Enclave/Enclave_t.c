@@ -21,6 +21,14 @@ typedef struct ms_generate_random_number_t {
 	int ms_retval;
 } ms_generate_random_number_t;
 
+typedef struct ms_get_password_t {
+	int ms_retval;
+} ms_get_password_t;
+
+typedef struct ms_add_password_t {
+	int ms_retval;
+} ms_add_password_t;
+
 typedef struct ms_seal_t {
 	sgx_status_t ms_retval;
 	uint8_t* ms_plaintext;
@@ -49,6 +57,32 @@ static sgx_status_t SGX_CDECL sgx_generate_random_number(void* pms)
 
 
 	ms->ms_retval = generate_random_number();
+
+
+	return status;
+}
+
+static sgx_status_t SGX_CDECL sgx_get_password(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_get_password_t));
+	ms_get_password_t* ms = SGX_CAST(ms_get_password_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+
+
+	ms->ms_retval = get_password();
+
+
+	return status;
+}
+
+static sgx_status_t SGX_CDECL sgx_add_password(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_add_password_t));
+	ms_add_password_t* ms = SGX_CAST(ms_add_password_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+
+
+	ms->ms_retval = add_password();
 
 
 	return status;
@@ -146,11 +180,13 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[3];
+	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[5];
 } g_ecall_table = {
-	3,
+	5,
 	{
 		{(void*)(uintptr_t)sgx_generate_random_number, 0},
+		{(void*)(uintptr_t)sgx_get_password, 0},
+		{(void*)(uintptr_t)sgx_add_password, 0},
 		{(void*)(uintptr_t)sgx_seal, 0},
 		{(void*)(uintptr_t)sgx_unseal, 0},
 	}
@@ -158,11 +194,11 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[1][3];
+	uint8_t entry_table[1][5];
 } g_dyn_entry_table = {
 	1,
 	{
-		{0, 0, 0, },
+		{0, 0, 0, 0, 0, },
 	}
 };
 

@@ -19,6 +19,9 @@ int main(int argc, char const *argv[]) {
     }
     int ptr;
     sgx_status_t status = generate_random_number(global_eid, &ptr);
+
+    sgx_status_t status2 = add_password(global_eid, &ptr);
+
     std::cout << status << std::endl;
     if (status != SGX_SUCCESS) {
         std::cout << "noob" << std::endl;
