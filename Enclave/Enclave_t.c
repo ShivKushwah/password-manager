@@ -26,7 +26,8 @@ typedef struct ms_get_password_t {
 } ms_get_password_t;
 
 typedef struct ms_add_password_t {
-	int ms_retval;
+	char ms_retval;
+	char* ms_password;
 } ms_add_password_t;
 
 typedef struct ms_seal_t {
@@ -80,10 +81,25 @@ static sgx_status_t SGX_CDECL sgx_add_password(void* pms)
 	CHECK_REF_POINTER(pms, sizeof(ms_add_password_t));
 	ms_add_password_t* ms = SGX_CAST(ms_add_password_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
+	char* _tmp_password = ms->ms_password;
+	size_t _len_password = _tmp_password ? strlen(_tmp_password) + 1 : 0;
+	char* _in_password = NULL;
 
+	CHECK_UNIQUE_POINTER(_tmp_password, _len_password);
 
-	ms->ms_retval = add_password();
+	if (_tmp_password != NULL && _len_password != 0) {
+		_in_password = (char*)malloc(_len_password);
+		if (_in_password == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
 
+		memcpy(_in_password, _tmp_password, _len_password);
+		_in_password[_len_password - 1] = '\0';
+	}
+	ms->ms_retval = add_password(_in_password);
+err:
+	if (_in_password) free(_in_password);
 
 	return status;
 }

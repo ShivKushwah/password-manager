@@ -5,7 +5,7 @@ enclave {
         /* define ECALLs here. */
         public int generate_random_number(void);
         public int get_password(void);
-        public int add_password(void);
+        public char add_password([in, string] char* password);
     };
 
     untrusted {

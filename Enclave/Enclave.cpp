@@ -7,10 +7,10 @@ int generate_random_number() {
     return 42;
 }
 
-int add_password() {
+char add_password(char* password) {
     ocall_print("Adding Password");
     //*secret = "abc";
-    return 42;
+    return 'd';
 }
 
 int get_password() {
