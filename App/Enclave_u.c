@@ -10,7 +10,7 @@ typedef struct ms_get_password_t {
 } ms_get_password_t;
 
 typedef struct ms_add_password_t {
-	char ms_retval;
+	char* ms_retval;
 	char* ms_password;
 } ms_add_password_t;
 
@@ -69,7 +69,7 @@ sgx_status_t get_password(sgx_enclave_id_t eid, char** retval)
 	return status;
 }
 
-sgx_status_t add_password(sgx_enclave_id_t eid, char* retval, char* password)
+sgx_status_t add_password(sgx_enclave_id_t eid, char** retval, char* password)
 {
 	sgx_status_t status;
 	ms_add_password_t ms;

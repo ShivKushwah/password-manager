@@ -20,8 +20,9 @@ int main(int argc, char const *argv[]) {
     int ptr;
     sgx_status_t status = generate_random_number(global_eid, &ptr);
 
-    char kk;
+    char* kk;
     sgx_status_t status2 = add_password(global_eid, &kk, "hello");
+    ocall_print(kk);
 
     char* kkk;
     sgx_status_t status3 = get_password(global_eid, &kkk);
