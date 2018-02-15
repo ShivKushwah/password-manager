@@ -23,6 +23,11 @@ int main(int argc, char const *argv[]) {
     char kk;
     sgx_status_t status2 = add_password(global_eid, &kk, "hello");
 
+    char* kkk;
+    sgx_status_t status3 = get_password(global_eid, &kkk);
+
+    ocall_print(kkk);
+
     std::cout << status << std::endl;
     if (status != SGX_SUCCESS) {
         std::cout << "noob" << std::endl;

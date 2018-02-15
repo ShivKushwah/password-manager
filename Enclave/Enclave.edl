@@ -4,7 +4,7 @@ enclave {
     trusted {
         /* define ECALLs here. */
         public int generate_random_number(void);
-        public int get_password(void);
+        public char* get_password(void);
         public char add_password([in, string] char* password);
     };
 

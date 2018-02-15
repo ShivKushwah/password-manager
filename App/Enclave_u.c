@@ -6,7 +6,7 @@ typedef struct ms_generate_random_number_t {
 } ms_generate_random_number_t;
 
 typedef struct ms_get_password_t {
-	int ms_retval;
+	char* ms_retval;
 } ms_get_password_t;
 
 typedef struct ms_add_password_t {
@@ -60,7 +60,7 @@ sgx_status_t generate_random_number(sgx_enclave_id_t eid, int* retval)
 	return status;
 }
 
-sgx_status_t get_password(sgx_enclave_id_t eid, int* retval)
+sgx_status_t get_password(sgx_enclave_id_t eid, char** retval)
 {
 	sgx_status_t status;
 	ms_get_password_t ms;

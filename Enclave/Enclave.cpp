@@ -1,6 +1,6 @@
 #include "Enclave_t.h"
 
-char secret[3];
+char* secret;
 
 int generate_random_number() {
     ocall_print("Processing random number generation...");
@@ -10,10 +10,12 @@ int generate_random_number() {
 char add_password(char* password) {
     ocall_print("Adding Password");
     //*secret = "abc";
-    return 'd';
+    secret = password;
+    return 'a';
 }
 
-int get_password() {
+char* get_password() {
     ocall_print("Here's the Password");
-    return 42;
+
+    return secret;
 }
