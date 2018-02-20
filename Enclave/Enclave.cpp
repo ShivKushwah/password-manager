@@ -12,13 +12,16 @@ void encrypt(char* str) {
 void decrypt(char* str) {
 	while (*str != '\0') {
 		*str = *str - 1;
+		str++;
 	}
 }
 
+/*
 int generate_random_number() {
     ocall_print("Processing random number generation...");
     return 42;
 }
+*/
 
 char* add_password(char* password) {
     ocall_print("Adding Password");
@@ -28,10 +31,10 @@ char* add_password(char* password) {
     return secret;
 }
 
-char* get_password() {
+char* get_password(char* encrypted_string) {
     ocall_print("Here's the Password");
-
-    return secret;
+    decrypt(encrypted_string);
+    return encrypted_string;
 }
 
 

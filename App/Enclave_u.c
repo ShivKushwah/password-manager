@@ -1,12 +1,9 @@
 #include "Enclave_u.h"
 #include <errno.h>
 
-typedef struct ms_generate_random_number_t {
-	int ms_retval;
-} ms_generate_random_number_t;
-
 typedef struct ms_get_password_t {
 	char* ms_retval;
+	char* ms_encrypted_string;
 } ms_get_password_t;
 
 typedef struct ms_add_password_t {
@@ -51,20 +48,12 @@ static const struct {
 		(void*)Enclave_ocall_print,
 	}
 };
-sgx_status_t generate_random_number(sgx_enclave_id_t eid, int* retval)
-{
-	sgx_status_t status;
-	ms_generate_random_number_t ms;
-	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);
-	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
-	return status;
-}
-
-sgx_status_t get_password(sgx_enclave_id_t eid, char** retval)
+sgx_status_t get_password(sgx_enclave_id_t eid, char** retval, char* encrypted_string)
 {
 	sgx_status_t status;
 	ms_get_password_t ms;
-	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
+	ms.ms_encrypted_string = encrypted_string;
+	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -74,7 +63,7 @@ sgx_status_t add_password(sgx_enclave_id_t eid, char** retval, char* password)
 	sgx_status_t status;
 	ms_add_password_t ms;
 	ms.ms_password = password;
-	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -87,7 +76,7 @@ sgx_status_t seal(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* plaintext
 	ms.ms_plaintext_len = plaintext_len;
 	ms.ms_sealed_data = sealed_data;
 	ms.ms_sealed_size = sealed_size;
-	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -100,7 +89,7 @@ sgx_status_t unseal(sgx_enclave_id_t eid, sgx_status_t* retval, sgx_sealed_data_
 	ms.ms_sealed_size = sealed_size;
 	ms.ms_plaintext = plaintext;
 	ms.ms_plaintext_len = plaintext_len;
-	status = sgx_ecall(eid, 4, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }

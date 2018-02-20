@@ -17,12 +17,9 @@
 } while (0)
 
 
-typedef struct ms_generate_random_number_t {
-	int ms_retval;
-} ms_generate_random_number_t;
-
 typedef struct ms_get_password_t {
 	char* ms_retval;
+	char* ms_encrypted_string;
 } ms_get_password_t;
 
 typedef struct ms_add_password_t {
@@ -50,28 +47,30 @@ typedef struct ms_ocall_print_t {
 	char* ms_str;
 } ms_ocall_print_t;
 
-static sgx_status_t SGX_CDECL sgx_generate_random_number(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_generate_random_number_t));
-	ms_generate_random_number_t* ms = SGX_CAST(ms_generate_random_number_t*, pms);
-	sgx_status_t status = SGX_SUCCESS;
-
-
-	ms->ms_retval = generate_random_number();
-
-
-	return status;
-}
-
 static sgx_status_t SGX_CDECL sgx_get_password(void* pms)
 {
 	CHECK_REF_POINTER(pms, sizeof(ms_get_password_t));
 	ms_get_password_t* ms = SGX_CAST(ms_get_password_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
+	char* _tmp_encrypted_string = ms->ms_encrypted_string;
+	size_t _len_encrypted_string = _tmp_encrypted_string ? strlen(_tmp_encrypted_string) + 1 : 0;
+	char* _in_encrypted_string = NULL;
 
+	CHECK_UNIQUE_POINTER(_tmp_encrypted_string, _len_encrypted_string);
 
-	ms->ms_retval = get_password();
+	if (_tmp_encrypted_string != NULL && _len_encrypted_string != 0) {
+		_in_encrypted_string = (char*)malloc(_len_encrypted_string);
+		if (_in_encrypted_string == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
 
+		memcpy(_in_encrypted_string, _tmp_encrypted_string, _len_encrypted_string);
+		_in_encrypted_string[_len_encrypted_string - 1] = '\0';
+	}
+	ms->ms_retval = get_password(_in_encrypted_string);
+err:
+	if (_in_encrypted_string) free(_in_encrypted_string);
 
 	return status;
 }
@@ -196,11 +195,10 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[5];
+	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[4];
 } g_ecall_table = {
-	5,
+	4,
 	{
-		{(void*)(uintptr_t)sgx_generate_random_number, 0},
 		{(void*)(uintptr_t)sgx_get_password, 0},
 		{(void*)(uintptr_t)sgx_add_password, 0},
 		{(void*)(uintptr_t)sgx_seal, 0},
@@ -210,11 +208,11 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[1][5];
+	uint8_t entry_table[1][4];
 } g_dyn_entry_table = {
 	1,
 	{
-		{0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, },
 	}
 };
 

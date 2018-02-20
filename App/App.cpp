@@ -17,23 +17,33 @@ int main(int argc, char const *argv[]) {
         std::cout << "Fail to initialize enclave." << std::endl;
         return 1;
     }
-    int ptr;
-    sgx_status_t status = generate_random_number(global_eid, &ptr);
+    //int ptr;
+    //sgx_status_t status = generate_random_number(global_eid, &ptr);
 
-    char* kk;
-    sgx_status_t status2 = add_password(global_eid, &kk, "hello");
-    ocall_print(kk);
+    char* add_password_return;
+    char* password = "hello";
+    ocall_print(password);
+    sgx_status_t status2 = add_password(global_eid, &add_password_return, password);
+    ocall_print(add_password_return);
 
-    char* kkk;
-    sgx_status_t status3 = get_password(global_eid, &kkk);
+    char* get_password_return;
+    sgx_status_t status3 = get_password(global_eid, &get_password_return, add_password_return);
 
-    ocall_print(kkk);
+    ocall_print(get_password_return);
+    //printf("%s\n", get_password_return);
 
-    std::cout << status << std::endl;
-    if (status != SGX_SUCCESS) {
+    std::cout << status2 << std::endl;
+    if (status2 != SGX_SUCCESS) {
         std::cout << "noob" << std::endl;
     }
-    printf("Random number: %d\n", ptr);
+    std::cout << status3 << std::endl;
+    if (status3 != SGX_SUCCESS) {
+        std::cout << "noob2" << std::endl;
+    }
+
+    //printf("Random number: %d\n", ptr);
+
+    /*
 
     // Seal the random number
     size_t sealed_size = sizeof(sgx_sealed_data_t) + sizeof(ptr);
@@ -58,6 +68,8 @@ int main(int argc, char const *argv[]) {
     }
 
     std::cout << "Seal round trip success! Receive back " << unsealed << std::endl;
+
+    */
 
     return 0;
 }
