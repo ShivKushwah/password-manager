@@ -20,17 +20,18 @@ int main(int argc, char const *argv[]) {
     //int ptr;
     //sgx_status_t status = generate_random_number(global_eid, &ptr);
 
-    char* add_password_return;
-    char* password = "hello";
+    int add_password_return;
+    // strings are const char* ptrs in modern C/C++ compilers
+    char password[] = "hello";
     ocall_print(password);
     sgx_status_t status2 = add_password(global_eid, &add_password_return, password);
-    ocall_print(add_password_return);
+    printf("add_password returned: %u\n", add_password_return);
 
-    char* get_password_return;
-    sgx_status_t status3 = get_password(global_eid, &get_password_return, add_password_return);
-
-    ocall_print(get_password_return);
-    //printf("%s\n", get_password_return);
+    char get_password_buffer[16];
+    int get_password_return;
+    sgx_status_t status3 = get_password(global_eid, &get_password_return, get_password_buffer, 16);
+    printf("get_password returned: %u\n", get_password_return);
+    printf("get_password buffer: %s\n", get_password_buffer);
 
     std::cout << status2 << std::endl;
     if (status2 != SGX_SUCCESS) {

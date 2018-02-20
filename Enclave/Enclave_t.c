@@ -17,15 +17,16 @@
 } while (0)
 
 
-typedef struct ms_get_password_t {
-	char* ms_retval;
-	char* ms_encrypted_string;
-} ms_get_password_t;
-
 typedef struct ms_add_password_t {
-	char* ms_retval;
+	int ms_retval;
 	char* ms_password;
 } ms_add_password_t;
+
+typedef struct ms_get_password_t {
+	int ms_retval;
+	char* ms_encrypted_string;
+	unsigned int ms_buffer_size;
+} ms_get_password_t;
 
 typedef struct ms_seal_t {
 	sgx_status_t ms_retval;
@@ -47,34 +48,6 @@ typedef struct ms_ocall_print_t {
 	char* ms_str;
 } ms_ocall_print_t;
 
-static sgx_status_t SGX_CDECL sgx_get_password(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_get_password_t));
-	ms_get_password_t* ms = SGX_CAST(ms_get_password_t*, pms);
-	sgx_status_t status = SGX_SUCCESS;
-	char* _tmp_encrypted_string = ms->ms_encrypted_string;
-	size_t _len_encrypted_string = _tmp_encrypted_string ? strlen(_tmp_encrypted_string) + 1 : 0;
-	char* _in_encrypted_string = NULL;
-
-	CHECK_UNIQUE_POINTER(_tmp_encrypted_string, _len_encrypted_string);
-
-	if (_tmp_encrypted_string != NULL && _len_encrypted_string != 0) {
-		_in_encrypted_string = (char*)malloc(_len_encrypted_string);
-		if (_in_encrypted_string == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		memcpy(_in_encrypted_string, _tmp_encrypted_string, _len_encrypted_string);
-		_in_encrypted_string[_len_encrypted_string - 1] = '\0';
-	}
-	ms->ms_retval = get_password(_in_encrypted_string);
-err:
-	if (_in_encrypted_string) free(_in_encrypted_string);
-
-	return status;
-}
-
 static sgx_status_t SGX_CDECL sgx_add_password(void* pms)
 {
 	CHECK_REF_POINTER(pms, sizeof(ms_add_password_t));
@@ -86,7 +59,7 @@ static sgx_status_t SGX_CDECL sgx_add_password(void* pms)
 
 	CHECK_UNIQUE_POINTER(_tmp_password, _len_password);
 
-	if (_tmp_password != NULL && _len_password != 0) {
+	if (_tmp_password != NULL) {
 		_in_password = (char*)malloc(_len_password);
 		if (_in_password == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
@@ -99,6 +72,36 @@ static sgx_status_t SGX_CDECL sgx_add_password(void* pms)
 	ms->ms_retval = add_password(_in_password);
 err:
 	if (_in_password) free(_in_password);
+
+	return status;
+}
+
+static sgx_status_t SGX_CDECL sgx_get_password(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_get_password_t));
+	ms_get_password_t* ms = SGX_CAST(ms_get_password_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	char* _tmp_encrypted_string = ms->ms_encrypted_string;
+	unsigned int _tmp_buffer_size = ms->ms_buffer_size;
+	size_t _len_encrypted_string = _tmp_buffer_size;
+	char* _in_encrypted_string = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_encrypted_string, _len_encrypted_string);
+
+	if (_tmp_encrypted_string != NULL) {
+		if ((_in_encrypted_string = (char*)malloc(_len_encrypted_string)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_encrypted_string, 0, _len_encrypted_string);
+	}
+	ms->ms_retval = get_password(_in_encrypted_string, _tmp_buffer_size);
+err:
+	if (_in_encrypted_string) {
+		memcpy(_tmp_encrypted_string, _in_encrypted_string, _len_encrypted_string);
+		free(_in_encrypted_string);
+	}
 
 	return status;
 }
@@ -120,7 +123,7 @@ static sgx_status_t SGX_CDECL sgx_seal(void* pms)
 	CHECK_UNIQUE_POINTER(_tmp_plaintext, _len_plaintext);
 	CHECK_UNIQUE_POINTER(_tmp_sealed_data, _len_sealed_data);
 
-	if (_tmp_plaintext != NULL && _len_plaintext != 0) {
+	if (_tmp_plaintext != NULL) {
 		_in_plaintext = (uint8_t*)malloc(_len_plaintext);
 		if (_in_plaintext == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
@@ -129,7 +132,7 @@ static sgx_status_t SGX_CDECL sgx_seal(void* pms)
 
 		memcpy(_in_plaintext, _tmp_plaintext, _len_plaintext);
 	}
-	if (_tmp_sealed_data != NULL && _len_sealed_data != 0) {
+	if (_tmp_sealed_data != NULL) {
 		if ((_in_sealed_data = (sgx_sealed_data_t*)malloc(_len_sealed_data)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
@@ -165,7 +168,7 @@ static sgx_status_t SGX_CDECL sgx_unseal(void* pms)
 	CHECK_UNIQUE_POINTER(_tmp_sealed_data, _len_sealed_data);
 	CHECK_UNIQUE_POINTER(_tmp_plaintext, _len_plaintext);
 
-	if (_tmp_sealed_data != NULL && _len_sealed_data != 0) {
+	if (_tmp_sealed_data != NULL) {
 		_in_sealed_data = (sgx_sealed_data_t*)malloc(_len_sealed_data);
 		if (_in_sealed_data == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
@@ -174,7 +177,7 @@ static sgx_status_t SGX_CDECL sgx_unseal(void* pms)
 
 		memcpy(_in_sealed_data, _tmp_sealed_data, _len_sealed_data);
 	}
-	if (_tmp_plaintext != NULL && _len_plaintext != 0) {
+	if (_tmp_plaintext != NULL) {
 		if ((_in_plaintext = (uint8_t*)malloc(_len_plaintext)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
@@ -199,8 +202,8 @@ SGX_EXTERNC const struct {
 } g_ecall_table = {
 	4,
 	{
-		{(void*)(uintptr_t)sgx_get_password, 0},
 		{(void*)(uintptr_t)sgx_add_password, 0},
+		{(void*)(uintptr_t)sgx_get_password, 0},
 		{(void*)(uintptr_t)sgx_seal, 0},
 		{(void*)(uintptr_t)sgx_unseal, 0},
 	}
