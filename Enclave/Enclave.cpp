@@ -3,9 +3,19 @@
 
 const unsigned MAX_PASSWORD_SIZE = 1024; 
 
-unsigned buffer_size;
+//unsigned buffer_size;
 char* secret;
 char* buffer;
+
+struct KeyStoreBank
+{
+	char* website;
+	char* password;
+	KeyStoreBank* next;
+};
+
+KeyStoreBank* firstKey = (KeyStoreBank*) malloc(sizeof(struct KeyStoreBank));
+KeyStoreBank* currentKey = firstKey;
 
 void encrypt(char* str) {
 	while (*str != '\0') {
@@ -28,7 +38,30 @@ int generate_random_number() {
 }
 */
 
-int add_password(char* password) {
+int add_password(char* website, char* password) {
+	size_t password_len = strlen(password);
+	size_t website_len = strlen(website);
+    if (password_len >= MAX_PASSWORD_SIZE || website_len >= MAX_PASSWORD_SIZE) {
+        // fail if password greater than a particular size.
+        return -1;
+    }
+    currentKey->password = (char*) malloc(sizeof(char) * password_len);
+    currentKey->website = (char*) malloc(sizeof(char) * website_len);
+    if (currentKey->password == NULL) {
+    	abort(); //out of memory
+    }
+    strncpy(currentKey->password, password, password_len);
+    strncpy(currentKey->website, website, website_len);
+
+    ocall_print("Adding password.");
+
+    KeyStoreBank* newKey = (KeyStoreBank*) malloc(sizeof(struct KeyStoreBank));
+    currentKey->next = newKey;
+    currentKey = newKey;
+
+    // return value = 0 means success.
+    return 0;
+	/*
     size_t password_len = strlen(password);
     if (password_len >= MAX_PASSWORD_SIZE) {
         // fail if password greater than a particular size.
@@ -46,13 +79,33 @@ int add_password(char* password) {
 
     // return value = 0 means success.
     return 0;
+    */
 }
 
+/*
 int get_password(char* encrypted_string, unsigned buffer_size) {
     ocall_print("Returning password.");
-    strncpy(buffer, secret, buffer_size);
-    decrypt(buffer);
-    strncpy(encrypted_string, buffer, buffer_size);
+
+    //strncpy(buffer, secret, buffer_size);
+    //decrypt(buffer);
+    //strncpy(encrypted_string, buffer, buffer_size);
+    return 0;
+}
+*/
+
+int get_password(char* website, char* returnstr) {
+    ocall_print("Returning password.");
+    size_t website_len = strlen(website);
+
+    KeyStoreBank* iterator = firstKey;
+    while (strcmp(website, iterator->website) != 0 && iterator != NULL) {
+    	iterator = iterator->next;
+    }
+    if (iterator == NULL) {
+    	*returnstr = '\0';
+    	return -1;
+    }
+    strncpy(returnstr, iterator->password, strlen(iterator->password));
     return 0;
 }
 

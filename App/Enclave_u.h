@@ -19,8 +19,8 @@ extern "C" {
 
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print, (const char* str));
 
-sgx_status_t add_password(sgx_enclave_id_t eid, int* retval, char* password);
-sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* encrypted_string, unsigned int buffer_size);
+sgx_status_t add_password(sgx_enclave_id_t eid, int* retval, char* website, char* password);
+sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* website, char* returnstr);
 sgx_status_t seal(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* plaintext, size_t plaintext_len, sgx_sealed_data_t* sealed_data, size_t sealed_size);
 sgx_status_t unseal(sgx_enclave_id_t eid, sgx_status_t* retval, sgx_sealed_data_t* sealed_data, size_t sealed_size, uint8_t* plaintext, uint32_t plaintext_len);
 

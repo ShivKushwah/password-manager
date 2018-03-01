@@ -3,13 +3,14 @@
 
 typedef struct ms_add_password_t {
 	int ms_retval;
+	char* ms_website;
 	char* ms_password;
 } ms_add_password_t;
 
 typedef struct ms_get_password_t {
 	int ms_retval;
-	char* ms_encrypted_string;
-	unsigned int ms_buffer_size;
+	char* ms_website;
+	char* ms_returnstr;
 } ms_get_password_t;
 
 typedef struct ms_seal_t {
@@ -49,22 +50,23 @@ static const struct {
 		(void*)Enclave_ocall_print,
 	}
 };
-sgx_status_t add_password(sgx_enclave_id_t eid, int* retval, char* password)
+sgx_status_t add_password(sgx_enclave_id_t eid, int* retval, char* website, char* password)
 {
 	sgx_status_t status;
 	ms_add_password_t ms;
+	ms.ms_website = website;
 	ms.ms_password = password;
 	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 
-sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* encrypted_string, unsigned int buffer_size)
+sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* website, char* returnstr)
 {
 	sgx_status_t status;
 	ms_get_password_t ms;
-	ms.ms_encrypted_string = encrypted_string;
-	ms.ms_buffer_size = buffer_size;
+	ms.ms_website = website;
+	ms.ms_returnstr = returnstr;
 	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;

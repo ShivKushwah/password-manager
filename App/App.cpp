@@ -19,19 +19,28 @@ int main(int argc, char const *argv[]) {
     }
     //int ptr;
     //sgx_status_t status = generate_random_number(global_eid, &ptr);
+    char main_password[] = "password";
+    
 
     int add_password_return;
     // strings are const char* ptrs in modern C/C++ compilers
     char password[] = "hello";
+    char website[] = "bro";
     ocall_print(password);
-    sgx_status_t status2 = add_password(global_eid, &add_password_return, password);
+    sgx_status_t status2 = add_password(global_eid, &add_password_return, website, password);
     printf("add_password returned: %u\n", add_password_return);
 
-    char get_password_buffer[16];
+    char get_password_return_str[16];
     int get_password_return;
-    sgx_status_t status3 = get_password(global_eid, &get_password_return, get_password_buffer, 16);
+    sgx_status_t status3 = get_password(global_eid, &get_password_return, website, get_password_return_str);
     printf("get_password returned: %u\n", get_password_return);
-    printf("get_password buffer: %s\n", get_password_buffer);
+    printf("get_password buffer: %s\n", get_password_return_str);
+
+    //char get_password_buffer[16];
+    //int get_password_return;
+    //sgx_status_t status3 = get_password(global_eid, &get_password_return, get_password_buffer, 16);
+    //printf("get_password returned: %u\n", get_password_return);
+    //printf("get_password buffer: %s\n", get_password_buffer);
 
     std::cout << status2 << std::endl;
     if (status2 != SGX_SUCCESS) {
