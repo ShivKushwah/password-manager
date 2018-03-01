@@ -23,10 +23,16 @@ typedef struct ms_add_password_t {
 	char* ms_password;
 } ms_add_password_t;
 
+typedef struct ms_create_keystore_t {
+	int ms_retval;
+	char* ms_main_password;
+} ms_create_keystore_t;
+
 typedef struct ms_get_password_t {
 	int ms_retval;
 	char* ms_website;
 	char* ms_returnstr;
+	char* ms_verification_password;
 } ms_get_password_t;
 
 typedef struct ms_seal_t {
@@ -92,6 +98,34 @@ err:
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_create_keystore(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_create_keystore_t));
+	ms_create_keystore_t* ms = SGX_CAST(ms_create_keystore_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	char* _tmp_main_password = ms->ms_main_password;
+	size_t _len_main_password = _tmp_main_password ? strlen(_tmp_main_password) + 1 : 0;
+	char* _in_main_password = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_main_password, _len_main_password);
+
+	if (_tmp_main_password != NULL && _len_main_password != 0) {
+		_in_main_password = (char*)malloc(_len_main_password);
+		if (_in_main_password == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_main_password, _tmp_main_password, _len_main_password);
+		_in_main_password[_len_main_password - 1] = '\0';
+	}
+	ms->ms_retval = create_keystore(_in_main_password);
+err:
+	if (_in_main_password) free(_in_main_password);
+
+	return status;
+}
+
 static sgx_status_t SGX_CDECL sgx_get_password(void* pms)
 {
 	CHECK_REF_POINTER(pms, sizeof(ms_get_password_t));
@@ -103,9 +137,13 @@ static sgx_status_t SGX_CDECL sgx_get_password(void* pms)
 	char* _tmp_returnstr = ms->ms_returnstr;
 	size_t _len_returnstr = 16;
 	char* _in_returnstr = NULL;
+	char* _tmp_verification_password = ms->ms_verification_password;
+	size_t _len_verification_password = _tmp_verification_password ? strlen(_tmp_verification_password) + 1 : 0;
+	char* _in_verification_password = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_website, _len_website);
 	CHECK_UNIQUE_POINTER(_tmp_returnstr, _len_returnstr);
+	CHECK_UNIQUE_POINTER(_tmp_verification_password, _len_verification_password);
 
 	if (_tmp_website != NULL && _len_website != 0) {
 		_in_website = (char*)malloc(_len_website);
@@ -125,13 +163,24 @@ static sgx_status_t SGX_CDECL sgx_get_password(void* pms)
 
 		memset((void*)_in_returnstr, 0, _len_returnstr);
 	}
-	ms->ms_retval = get_password(_in_website, _in_returnstr);
+	if (_tmp_verification_password != NULL && _len_verification_password != 0) {
+		_in_verification_password = (char*)malloc(_len_verification_password);
+		if (_in_verification_password == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_verification_password, _tmp_verification_password, _len_verification_password);
+		_in_verification_password[_len_verification_password - 1] = '\0';
+	}
+	ms->ms_retval = get_password(_in_website, _in_returnstr, _in_verification_password);
 err:
 	if (_in_website) free(_in_website);
 	if (_in_returnstr) {
 		memcpy(_tmp_returnstr, _in_returnstr, _len_returnstr);
 		free(_in_returnstr);
 	}
+	if (_in_verification_password) free(_in_verification_password);
 
 	return status;
 }
@@ -228,11 +277,12 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[4];
+	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[5];
 } g_ecall_table = {
-	4,
+	5,
 	{
 		{(void*)(uintptr_t)sgx_add_password, 0},
+		{(void*)(uintptr_t)sgx_create_keystore, 0},
 		{(void*)(uintptr_t)sgx_get_password, 0},
 		{(void*)(uintptr_t)sgx_seal, 0},
 		{(void*)(uintptr_t)sgx_unseal, 0},
@@ -241,11 +291,11 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[1][4];
+	uint8_t entry_table[1][5];
 } g_dyn_entry_table = {
 	1,
 	{
-		{0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, },
 	}
 };
 

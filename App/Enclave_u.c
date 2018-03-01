@@ -7,10 +7,16 @@ typedef struct ms_add_password_t {
 	char* ms_password;
 } ms_add_password_t;
 
+typedef struct ms_create_keystore_t {
+	int ms_retval;
+	char* ms_main_password;
+} ms_create_keystore_t;
+
 typedef struct ms_get_password_t {
 	int ms_retval;
 	char* ms_website;
 	char* ms_returnstr;
+	char* ms_verification_password;
 } ms_get_password_t;
 
 typedef struct ms_seal_t {
@@ -61,13 +67,24 @@ sgx_status_t add_password(sgx_enclave_id_t eid, int* retval, char* website, char
 	return status;
 }
 
-sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* website, char* returnstr)
+sgx_status_t create_keystore(sgx_enclave_id_t eid, int* retval, char* main_password)
+{
+	sgx_status_t status;
+	ms_create_keystore_t ms;
+	ms.ms_main_password = main_password;
+	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* website, char* returnstr, char* verification_password)
 {
 	sgx_status_t status;
 	ms_get_password_t ms;
 	ms.ms_website = website;
 	ms.ms_returnstr = returnstr;
-	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
+	ms.ms_verification_password = verification_password;
+	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -80,7 +97,7 @@ sgx_status_t seal(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* plaintext
 	ms.ms_plaintext_len = plaintext_len;
 	ms.ms_sealed_data = sealed_data;
 	ms.ms_sealed_size = sealed_size;
-	status = sgx_ecall(eid, 2, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -93,7 +110,7 @@ sgx_status_t unseal(sgx_enclave_id_t eid, sgx_status_t* retval, sgx_sealed_data_
 	ms.ms_sealed_size = sealed_size;
 	ms.ms_plaintext = plaintext;
 	ms.ms_plaintext_len = plaintext_len;
-	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 4, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }

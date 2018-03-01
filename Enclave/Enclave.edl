@@ -5,8 +5,10 @@ enclave {
         /* define ECALLs here. */
         //public int generate_random_number(void);
         public int add_password([in, string] char* website, [in, string] char* password);
+        public int create_keystore([in, string] char* main_password);
+
         //public int get_password([out, size=buffer_size] char* website, [out, size=buffer_size] char* encrypted_string);
-        public int get_password([in, string] char* website, [out, size=16] char* returnstr);
+        public int get_password([in, string] char* website, [out, size=16] char* returnstr, [in, string] char* verification_password);
     };
 
     untrusted {

@@ -7,6 +7,8 @@ const unsigned MAX_PASSWORD_SIZE = 1024;
 char* secret;
 char* buffer;
 
+char* password; //main password for entire keystore
+
 struct KeyStoreBank
 {
 	char* website;
@@ -38,6 +40,18 @@ int generate_random_number() {
 }
 */
 
+int create_keystore(char* main_password) {
+	size_t password_len = strlen(main_password);
+	password = (char*) malloc(sizeof(char) + password_len + 1);
+	if (password == NULL) {
+		abort();
+	}
+	strncpy(password, main_password, password_len);
+	return 0;
+
+
+}
+
 int add_password(char* website, char* password) {
 	size_t password_len = strlen(password);
 	size_t website_len = strlen(website);
@@ -45,8 +59,8 @@ int add_password(char* website, char* password) {
         // fail if password greater than a particular size.
         return -1;
     }
-    currentKey->password = (char*) malloc(sizeof(char) * password_len);
-    currentKey->website = (char*) malloc(sizeof(char) * website_len);
+    currentKey->password = (char*) malloc(sizeof(char) * password_len + 1);
+    currentKey->website = (char*) malloc(sizeof(char) * website_len + 1);
     if (currentKey->password == NULL) {
     	abort(); //out of memory
     }
@@ -93,9 +107,14 @@ int get_password(char* encrypted_string, unsigned buffer_size) {
 }
 */
 
-int get_password(char* website, char* returnstr) {
+int get_password(char* website, char* returnstr, char* verification_password) {
     ocall_print("Returning password.");
     size_t website_len = strlen(website);
+
+    if (strcmp(verification_password, password) != 0) {
+    	*returnstr = '\0';
+    	return -1;
+    }
 
     KeyStoreBank* iterator = firstKey;
     while (strcmp(website, iterator->website) != 0 && iterator != NULL) {

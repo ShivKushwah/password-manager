@@ -20,7 +20,11 @@ int main(int argc, char const *argv[]) {
     //int ptr;
     //sgx_status_t status = generate_random_number(global_eid, &ptr);
     char main_password[] = "password";
-    
+    int create_keystore_return;
+    sgx_status_t status = create_keystore(global_eid, &create_keystore_return, main_password);
+
+
+
 
     int add_password_return;
     // strings are const char* ptrs in modern C/C++ compilers
@@ -32,7 +36,7 @@ int main(int argc, char const *argv[]) {
 
     char get_password_return_str[16];
     int get_password_return;
-    sgx_status_t status3 = get_password(global_eid, &get_password_return, website, get_password_return_str);
+    sgx_status_t status3 = get_password(global_eid, &get_password_return, website, get_password_return_str, main_password);
     printf("get_password returned: %u\n", get_password_return);
     printf("get_password buffer: %s\n", get_password_return_str);
 
