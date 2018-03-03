@@ -40,6 +40,11 @@ typedef struct ms_get_encrypted_keystore_t {
 	void* ms_p_dst;
 } ms_get_encrypted_keystore_t;
 
+typedef struct ms_serialize_key_store_t {
+	int ms_retval;
+	void* ms_p_dst;
+} ms_serialize_key_store_t;
+
 typedef struct ms_seal_t {
 	sgx_status_t ms_retval;
 	uint8_t* ms_plaintext;
@@ -219,6 +224,35 @@ err:
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_serialize_key_store(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_serialize_key_store_t));
+	ms_serialize_key_store_t* ms = SGX_CAST(ms_serialize_key_store_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	void* _tmp_p_dst = ms->ms_p_dst;
+	size_t _len_p_dst = 24;
+	void* _in_p_dst = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_p_dst, _len_p_dst);
+
+	if (_tmp_p_dst != NULL && _len_p_dst != 0) {
+		if ((_in_p_dst = (void*)malloc(_len_p_dst)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_p_dst, 0, _len_p_dst);
+	}
+	ms->ms_retval = serialize_key_store(_in_p_dst);
+err:
+	if (_in_p_dst) {
+		memcpy(_tmp_p_dst, _in_p_dst, _len_p_dst);
+		free(_in_p_dst);
+	}
+
+	return status;
+}
+
 static sgx_status_t SGX_CDECL sgx_seal(void* pms)
 {
 	CHECK_REF_POINTER(pms, sizeof(ms_seal_t));
@@ -311,14 +345,15 @@ err:
 
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[6];
+	struct {void* ecall_addr; uint8_t is_priv;} ecall_table[7];
 } g_ecall_table = {
-	6,
+	7,
 	{
 		{(void*)(uintptr_t)sgx_add_password, 0},
 		{(void*)(uintptr_t)sgx_create_keystore, 0},
 		{(void*)(uintptr_t)sgx_get_password, 0},
 		{(void*)(uintptr_t)sgx_get_encrypted_keystore, 0},
+		{(void*)(uintptr_t)sgx_serialize_key_store, 0},
 		{(void*)(uintptr_t)sgx_seal, 0},
 		{(void*)(uintptr_t)sgx_unseal, 0},
 	}
@@ -326,11 +361,11 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[1][6];
+	uint8_t entry_table[1][7];
 } g_dyn_entry_table = {
 	1,
 	{
-		{0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, },
 	}
 };
 

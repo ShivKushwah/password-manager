@@ -148,12 +148,70 @@ char* itoa(int val, int base){
 	
 }
 
+int serialize_key_store(void* p_dst) {
+	//serialize_key_store
+	void* key_store =  malloc(numPasswords * sizeof(struct KeyStoreBank)); //change this to char
+	ocall_print("BRO");
+
+	ocall_print((char*) key_store);
+	ocall_print("BRO");
+
+	//need to copy 
+	size_t currentByte = 0;
+	KeyStoreBank* key = firstKey;
+	ocall_print((char*) key);
+
+	while (key->next != NULL) {
+		ocall_print("YO");
+		memcpy(key_store + currentByte, key, sizeof(struct KeyStoreBank));
+		key = key->next;
+		currentByte = currentByte + sizeof(struct KeyStoreBank);
+	}
+
+	ocall_print((char*) key_store);
+	ocall_print(itoa(currentByte, 10));
+	memcpy(p_dst, key_store, currentByte);
+
+	return 0;
+	
+
+}
+
 int get_encrypted_keystore(void* p_dst) {
 	//generate key
 
 	//print num_passwords
 	//char* num = itoa(numPasswords, 10);
 	//ocall_print(num);
+
+	//serialize_key_store
+	void* key_store =  malloc(numPasswords * sizeof(struct KeyStoreBank)); 
+	size_t currentByte = 0;
+	KeyStoreBank* key = firstKey;
+
+	while (key->next != NULL) {
+		ocall_print("YO");
+		memcpy(key_store + currentByte, key, sizeof(struct KeyStoreBank));
+		key = key->next;
+		currentByte = currentByte + sizeof(struct KeyStoreBank);
+	}
+
+	//keystore has the keystore serialized
+
+	//we need to encrypt the keystore
+	//void* encypted_key_store =  malloc(numPasswords * sizeof(struct KeyStoreBank)); 
+	//uint8_t* rand_vector;
+	//sgx_read_rand(rand_vector, sizeof(uint8_t));
+
+	//sgx_rijndael128GCM_encrypt(password, key_store, currentByte, encypted_key_store, rand_vector, sizeof(uint8_t));
+
+	ocall_print((char*) key_store);
+	ocall_print(itoa(currentByte, 10));
+	memcpy(p_dst, key_store, currentByte);
+
+	return 0;
+
+	/*
 
 	//serialize_key_store
 	void* key_store =  malloc(numPasswords * sizeof(struct KeyStoreBank)); //change this to char
@@ -170,24 +228,23 @@ int get_encrypted_keystore(void* p_dst) {
 	while (key->next != NULL) {
 		ocall_print("YO");
 		memcpy(key_store + currentByte, key, sizeof(struct KeyStoreBank));
-		//strncpy(key_store + currentByte, (char*)key, sizeof(struct KeyStoreBank));
-		//ocall_print((char*) key_store);
 		key = key->next;
 		currentByte = currentByte + sizeof(struct KeyStoreBank);
 	}
 
-	//char* num = itoa(sizeof(struct KeyStoreBank), 10);
-	//ocall_print(num);
-	//*key_store = '\0';
-	//p_dst = (char*) key_store;
 	ocall_print((char*) key_store);
 	ocall_print(itoa(currentByte, 10));
-	memcpy(p_dst, key_store, currentByte);//currentByte - sizeof(struct KeyStoreBank));
-
+	memcpy(p_dst, key_store, currentByte);
 
 	return 0;
+	*/
 	//sgx_rijndael128GCM_encrypt //call with key
 
+
+}
+
+int decrypt_and_set_key_store(void* key_store) {
+	
 
 }
 

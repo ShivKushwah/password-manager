@@ -49,10 +49,19 @@ int main(int argc, char const *argv[]) {
 
     int encrypt_return;
     void* encrypt = malloc(48);
-    sgx_status_t status4 = get_encrypted_keystore(global_eid, &encrypt_return, encrypt);
-    printf("get_encrypted_keystore returned: %u\n", encrypt_return);
-    printf("get_encrypted_keystore string: %s\n", (char*) encrypt);
+    sgx_status_t status4 = serialize_key_store(global_eid, &encrypt_return, encrypt);
+    printf("serialize_key_store returned: %u\n", encrypt_return);
+    printf("serialize_key_store string: %s\n", (char*) encrypt);
     ocall_print((char*) encrypt);
+
+    void* encypted_key_store =  malloc(48);//malloc(numPasswords * sizeof(struct KeyStoreBank)); 
+    uint8_t* rand_vector;
+    const uint8_t pw;
+
+    //sgx_status_t bro = sgx_read_rand(global_eid, &encrypt_return, rand_vector, sizeof(uint8_t));
+
+    sgx_rijndael128GCM_encrypt(pw, encrypt, 24, encypted_key_store, rand_vector, sizeof(uint8_t) , NULL, NULL, NULL);
+
 
 
     std::cout << status2 << std::endl;
