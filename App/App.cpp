@@ -26,6 +26,7 @@ int main(int argc, char const *argv[]) {
 
 
 
+
     int add_password_return;
     // strings are const char* ptrs in modern C/C++ compilers
     char password[] = "hello";
@@ -45,6 +46,14 @@ int main(int argc, char const *argv[]) {
     //sgx_status_t status3 = get_password(global_eid, &get_password_return, get_password_buffer, 16);
     //printf("get_password returned: %u\n", get_password_return);
     //printf("get_password buffer: %s\n", get_password_buffer);
+
+    int encrypt_return;
+    void* encrypt = malloc(48);
+    sgx_status_t status4 = get_encrypted_keystore(global_eid, &encrypt_return, encrypt);
+    printf("get_encrypted_keystore returned: %u\n", encrypt_return);
+    printf("get_encrypted_keystore string: %s\n", (char*) encrypt);
+    ocall_print((char*) encrypt);
+
 
     std::cout << status2 << std::endl;
     if (status2 != SGX_SUCCESS) {

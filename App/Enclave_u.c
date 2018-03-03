@@ -19,6 +19,11 @@ typedef struct ms_get_password_t {
 	char* ms_verification_password;
 } ms_get_password_t;
 
+typedef struct ms_get_encrypted_keystore_t {
+	int ms_retval;
+	void* ms_p_dst;
+} ms_get_encrypted_keystore_t;
+
 typedef struct ms_seal_t {
 	sgx_status_t ms_retval;
 	uint8_t* ms_plaintext;
@@ -89,6 +94,16 @@ sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* website, char
 	return status;
 }
 
+sgx_status_t get_encrypted_keystore(sgx_enclave_id_t eid, int* retval, void* p_dst)
+{
+	sgx_status_t status;
+	ms_get_encrypted_keystore_t ms;
+	ms.ms_p_dst = p_dst;
+	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
 sgx_status_t seal(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* plaintext, size_t plaintext_len, sgx_sealed_data_t* sealed_data, size_t sealed_size)
 {
 	sgx_status_t status;
@@ -97,7 +112,7 @@ sgx_status_t seal(sgx_enclave_id_t eid, sgx_status_t* retval, uint8_t* plaintext
 	ms.ms_plaintext_len = plaintext_len;
 	ms.ms_sealed_data = sealed_data;
 	ms.ms_sealed_size = sealed_size;
-	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 4, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
@@ -110,7 +125,7 @@ sgx_status_t unseal(sgx_enclave_id_t eid, sgx_status_t* retval, sgx_sealed_data_
 	ms.ms_sealed_size = sealed_size;
 	ms.ms_plaintext = plaintext;
 	ms.ms_plaintext_len = plaintext_len;
-	status = sgx_ecall(eid, 4, &ocall_table_Enclave, &ms);
+	status = sgx_ecall(eid, 5, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
