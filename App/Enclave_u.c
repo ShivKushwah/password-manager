@@ -19,15 +19,15 @@ typedef struct ms_get_password_t {
 	char* ms_verification_password;
 } ms_get_password_t;
 
-typedef struct ms_get_encrypted_keystore_t {
-	int ms_retval;
-	void* ms_p_dst;
-} ms_get_encrypted_keystore_t;
-
 typedef struct ms_serialize_key_store_t {
 	int ms_retval;
 	void* ms_p_dst;
 } ms_serialize_key_store_t;
+
+typedef struct ms_decrypt_and_set_key_store_t {
+	int ms_retval;
+	void* ms_key_store;
+} ms_decrypt_and_set_key_store_t;
 
 typedef struct ms_seal_t {
 	sgx_status_t ms_retval;
@@ -99,21 +99,21 @@ sgx_status_t get_password(sgx_enclave_id_t eid, int* retval, char* website, char
 	return status;
 }
 
-sgx_status_t get_encrypted_keystore(sgx_enclave_id_t eid, int* retval, void* p_dst)
+sgx_status_t serialize_key_store(sgx_enclave_id_t eid, int* retval, void* p_dst)
 {
 	sgx_status_t status;
-	ms_get_encrypted_keystore_t ms;
+	ms_serialize_key_store_t ms;
 	ms.ms_p_dst = p_dst;
 	status = sgx_ecall(eid, 3, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 
-sgx_status_t serialize_key_store(sgx_enclave_id_t eid, int* retval, void* p_dst)
+sgx_status_t decrypt_and_set_key_store(sgx_enclave_id_t eid, int* retval, void* key_store)
 {
 	sgx_status_t status;
-	ms_serialize_key_store_t ms;
-	ms.ms_p_dst = p_dst;
+	ms_decrypt_and_set_key_store_t ms;
+	ms.ms_key_store = key_store;
 	status = sgx_ecall(eid, 4, &ocall_table_Enclave, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;

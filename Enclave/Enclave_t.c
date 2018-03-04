@@ -35,15 +35,15 @@ typedef struct ms_get_password_t {
 	char* ms_verification_password;
 } ms_get_password_t;
 
-typedef struct ms_get_encrypted_keystore_t {
-	int ms_retval;
-	void* ms_p_dst;
-} ms_get_encrypted_keystore_t;
-
 typedef struct ms_serialize_key_store_t {
 	int ms_retval;
 	void* ms_p_dst;
 } ms_serialize_key_store_t;
+
+typedef struct ms_decrypt_and_set_key_store_t {
+	int ms_retval;
+	void* ms_key_store;
+} ms_decrypt_and_set_key_store_t;
 
 typedef struct ms_seal_t {
 	sgx_status_t ms_retval;
@@ -195,35 +195,6 @@ err:
 	return status;
 }
 
-static sgx_status_t SGX_CDECL sgx_get_encrypted_keystore(void* pms)
-{
-	CHECK_REF_POINTER(pms, sizeof(ms_get_encrypted_keystore_t));
-	ms_get_encrypted_keystore_t* ms = SGX_CAST(ms_get_encrypted_keystore_t*, pms);
-	sgx_status_t status = SGX_SUCCESS;
-	void* _tmp_p_dst = ms->ms_p_dst;
-	size_t _len_p_dst = 24;
-	void* _in_p_dst = NULL;
-
-	CHECK_UNIQUE_POINTER(_tmp_p_dst, _len_p_dst);
-
-	if (_tmp_p_dst != NULL && _len_p_dst != 0) {
-		if ((_in_p_dst = (void*)malloc(_len_p_dst)) == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		memset((void*)_in_p_dst, 0, _len_p_dst);
-	}
-	ms->ms_retval = get_encrypted_keystore(_in_p_dst);
-err:
-	if (_in_p_dst) {
-		memcpy(_tmp_p_dst, _in_p_dst, _len_p_dst);
-		free(_in_p_dst);
-	}
-
-	return status;
-}
-
 static sgx_status_t SGX_CDECL sgx_serialize_key_store(void* pms)
 {
 	CHECK_REF_POINTER(pms, sizeof(ms_serialize_key_store_t));
@@ -249,6 +220,33 @@ err:
 		memcpy(_tmp_p_dst, _in_p_dst, _len_p_dst);
 		free(_in_p_dst);
 	}
+
+	return status;
+}
+
+static sgx_status_t SGX_CDECL sgx_decrypt_and_set_key_store(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_decrypt_and_set_key_store_t));
+	ms_decrypt_and_set_key_store_t* ms = SGX_CAST(ms_decrypt_and_set_key_store_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	void* _tmp_key_store = ms->ms_key_store;
+	size_t _len_key_store = 24;
+	void* _in_key_store = NULL;
+
+	CHECK_UNIQUE_POINTER(_tmp_key_store, _len_key_store);
+
+	if (_tmp_key_store != NULL && _len_key_store != 0) {
+		_in_key_store = (void*)malloc(_len_key_store);
+		if (_in_key_store == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy(_in_key_store, _tmp_key_store, _len_key_store);
+	}
+	ms->ms_retval = decrypt_and_set_key_store(_in_key_store);
+err:
+	if (_in_key_store) free(_in_key_store);
 
 	return status;
 }
@@ -352,8 +350,8 @@ SGX_EXTERNC const struct {
 		{(void*)(uintptr_t)sgx_add_password, 0},
 		{(void*)(uintptr_t)sgx_create_keystore, 0},
 		{(void*)(uintptr_t)sgx_get_password, 0},
-		{(void*)(uintptr_t)sgx_get_encrypted_keystore, 0},
 		{(void*)(uintptr_t)sgx_serialize_key_store, 0},
+		{(void*)(uintptr_t)sgx_decrypt_and_set_key_store, 0},
 		{(void*)(uintptr_t)sgx_seal, 0},
 		{(void*)(uintptr_t)sgx_unseal, 0},
 	}
