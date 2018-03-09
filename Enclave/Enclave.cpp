@@ -1,5 +1,6 @@
 #include "Enclave_t.h"
 #include <string.h>
+#include <binn/binn.h>
 
 const unsigned MAX_PASSWORD_SIZE = 1024; 
 
@@ -133,7 +134,7 @@ int serialize_key_store(void* p_dst) {
 	KeyStoreBank* key = firstKey;
 
 	while (key->next != NULL) {
-		memcpy(key_store + currentByte, key, sizeof(struct KeyStoreBank));
+		memcpy((char*)key_store + currentByte, key, sizeof(struct KeyStoreBank));
 		key = key->next;
 		currentByte = currentByte + sizeof(struct KeyStoreBank);
 	}
