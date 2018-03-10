@@ -1,7 +1,7 @@
 #include "Enclave_t.h"
 #include <string.h>
 #include "sgx_trts.h"
-
+#include <binn/binn.h>
 
 const unsigned MAX_PASSWORD_SIZE = 1024; 
 
@@ -134,7 +134,41 @@ char* itoa(int val, int base){
 	
 }
 
+char* string_integer_concat(char* str, int a) {
+	char* str2 = itoa(a, 10);
+	int len1 = strlen(str);
+	int len2 = strlen(str2);
+	char* final = (char*) malloc(len1 + len2 + 1);
+	char* iterator = final;
+	
+
+	for (int i = 0; i < len1; i++) {
+		*iterator = *str;
+		iterator++;
+		str++;
+	}
+	for (int i = 0; i < len2; i++) {
+		*iterator = *str2;
+		iterator++;
+		str2++;
+	} 
+	*iterator = '\0';
+	return final;
+}
+
+void dumb_mem_cpy(void* dst, void* toCopy, int size) {
+	char* iterator1 = (char*) dst;
+	char* iterator2 = (char*) toCopy;
+	for (int i = 0; i < size; i++) {
+		*iterator1 = *iterator2;
+		iterator1++;
+		iterator2++;
+	}
+
+}
+
 int serialize_key_store(void* p_dst) {
+	/*
 	void* key_store =  malloc(numPasswords * sizeof(struct KeyStoreBank)); 
 	//ocall_print((char*) key_store);
 
@@ -142,7 +176,7 @@ int serialize_key_store(void* p_dst) {
 	KeyStoreBank* key = firstKey;
 
 	while (key->next != NULL) {
-		memcpy(key_store + currentByte, key, sizeof(struct KeyStoreBank));
+		memcpy((char*)key_store + currentByte, key, sizeof(struct KeyStoreBank)); //problem is you are copying the string pointers, not the actual values of the pointers.
 		key = key->next;
 		currentByte = currentByte + sizeof(struct KeyStoreBank);
 	}
@@ -152,11 +186,45 @@ int serialize_key_store(void* p_dst) {
 	memcpy(p_dst, key_store, currentByte);
 
 	return 0;
+	*/
+	//ocall_print("helo");
+	binn* obj = binn_object();
+	KeyStoreBank* key = firstKey;
+	int i = 0;
 	
+	while (key->next != NULL) {
+		binn_object_set_str(obj, string_integer_concat("website", i), key->website);
+		binn_object_set_str(obj, string_integer_concat("password", i), key->password);
+		key = key->next;
+		i++;
+	}
+	
+	//binn_object_set_str(obj, "website0", key->website);
+	//binn_object_set_int32(obj, "password0", 32);
+	//binn_object_set_str(obj, "website1", key->password);
+
+	//ocall_print((char*) p_dst);
+	//ocall_print(itoa(binn_size(obj), 10));
+
+	//char* dude = binn_object_str(obj, "website0");
+	//ocall_print("hope this works1");
+	//ocall_print(dude);
+
+	memcpy(p_dst, binn_ptr(obj), binn_size(obj));
+	//ocall_print((char *) p_dst);
+
+	binn_free(obj);
+
+	return 0;
+
+
 
 }
 
+
+
 int decrypt_and_set_key_store(void* key_store) {
+	/*
 	//this should only work for 1 key in the key_store
 
 	//need to call free
@@ -164,9 +232,17 @@ int decrypt_and_set_key_store(void* key_store) {
 	memcpy(firstKey, key_store, sizeof(struct KeyStoreBank));
 	ocall_print((char* )firstKey->next);
 	return 0;
+	*/
+	//ocall_print((char*) key_store);
+
+	char* password = binn_object_str(key_store, string_integer_concat("website", 0));
+	ocall_print("hope this works");
+	ocall_print(password);
 
 
 }
+
+
 
 
 

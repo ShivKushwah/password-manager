@@ -201,7 +201,7 @@ static sgx_status_t SGX_CDECL sgx_serialize_key_store(void* pms)
 	ms_serialize_key_store_t* ms = SGX_CAST(ms_serialize_key_store_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
 	void* _tmp_p_dst = ms->ms_p_dst;
-	size_t _len_p_dst = 24;
+	size_t _len_p_dst = 70;
 	void* _in_p_dst = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_p_dst, _len_p_dst);
@@ -230,7 +230,7 @@ static sgx_status_t SGX_CDECL sgx_decrypt_and_set_key_store(void* pms)
 	ms_decrypt_and_set_key_store_t* ms = SGX_CAST(ms_decrypt_and_set_key_store_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
 	void* _tmp_key_store = ms->ms_key_store;
-	size_t _len_key_store = 24;
+	size_t _len_key_store = 70;
 	void* _in_key_store = NULL;
 
 	CHECK_UNIQUE_POINTER(_tmp_key_store, _len_key_store);
