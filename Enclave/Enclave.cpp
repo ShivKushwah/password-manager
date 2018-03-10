@@ -235,9 +235,30 @@ int decrypt_and_set_key_store(void* key_store) {
 	*/
 	//ocall_print((char*) key_store);
 
-	char* password = binn_object_str(key_store, string_integer_concat("website", 0));
-	ocall_print("hope this works");
-	ocall_print(password);
+	//need to call free
+
+	firstKey = (KeyStoreBank*) malloc(sizeof(struct KeyStoreBank));
+    currentKey = firstKey;
+
+
+    char* temp = binn_object_str(key_store, string_integer_concat("website", 0));
+    int i = 0;
+    while (temp != NULL) {
+
+    	char* website = binn_object_str(key_store, string_integer_concat("website", i));
+    	char* password = binn_object_str(key_store, string_integer_concat("password", i));
+    	ocall_print(website);
+    	ocall_print(password);
+    	
+    	add_password(website,password);
+    	i++;
+    	
+    	temp = binn_object_str(key_store, string_integer_concat("website", i));
+    }
+
+	//char* password = binn_object_str(key_store, string_integer_concat("website", 0));
+	//ocall_print("hope this works");
+	//ocall_print(password);
 
 
 }
