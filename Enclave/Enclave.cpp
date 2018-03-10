@@ -101,16 +101,16 @@ int get_password(char* website, char* returnstr, char* verification_password) {
     }
 
     KeyStoreBank* iterator = firstKey;
-    while (iterator != NULL && strcmp(website, iterator->website) != 0) {
-    	ocall_print(iterator->website);
+    while (iterator != NULL && iterator->next != NULL && strcmp(website, iterator->website) != 0) {
+    	//ocall_print(iterator->website);
     	iterator = iterator->next;
     	//TODO: Bug is that after you serialize, the iterator->next should be null, instead the iterator->next->website is null
 
 
 
     }
-    if (iterator == NULL) {
-
+    if (iterator == NULL || iterator->next == NULL) {
+    	ocall_print("breh");
     	*returnstr = '\0';
     	return -1;
     }
@@ -245,6 +245,8 @@ int decrypt_and_set_key_store(void* key_store) {
 
 	firstKey = (KeyStoreBank*) malloc(sizeof(struct KeyStoreBank));
     currentKey = firstKey;
+    firstKey->next=NULL;
+    numPasswords = 0;
 
 
     char* temp = binn_object_str(key_store, string_integer_concat("website", 0));
