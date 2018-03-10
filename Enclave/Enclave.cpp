@@ -1,5 +1,7 @@
 #include "Enclave_t.h"
 #include <string.h>
+#include "sgx_trts.h"
+
 
 const unsigned MAX_PASSWORD_SIZE = 1024; 
 
@@ -107,6 +109,13 @@ int get_password(char* website, char* returnstr, char* verification_password) {
     	return -1;
     }
     strncpy(returnstr, iterator->password, strlen(iterator->password));
+
+    unsigned char var[3] = "hi";
+
+    sgx_read_rand(var, 2);
+
+   // sgx_rijndael128GCM_encrypt()
+
     return 0;
 }
 
