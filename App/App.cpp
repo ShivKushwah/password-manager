@@ -43,7 +43,7 @@ int main(int argc, char const *argv[]) {
     printf("serialize_key_store string: %s\n", (char*) encrypt);
     //ocall_print((char*) encrypt);
 
-    /*
+    
 
     //add pass2
     int add_password_return2;
@@ -67,12 +67,12 @@ int main(int argc, char const *argv[]) {
     printf("get_password returned: %u\n", get_password_return2);
     printf("get_password buffer: %s\n", get_password_return_str2);
 
-    */
+    
 
     //set keystore to only have pass1
     sgx_status_t status5 = decrypt_and_set_key_store(global_eid, &encrypt_return, encrypt);
 
-    /*
+    printf("It got here my dude");
     //get pass2 (should not be able to find)
     sgx_status_t status333 = get_password(global_eid, &get_password_return, website2, get_password_return_str, main_password);
     printf("get_password returned: %u\n", get_password_return);
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[]) {
     }
 
     //printf("Random number: %d\n", ptr);
-    */
+    
 
     /*
 

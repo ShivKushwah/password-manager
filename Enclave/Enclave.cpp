@@ -101,10 +101,16 @@ int get_password(char* website, char* returnstr, char* verification_password) {
     }
 
     KeyStoreBank* iterator = firstKey;
-    while (strcmp(website, iterator->website) != 0 && iterator != NULL) {
+    while (iterator != NULL && strcmp(website, iterator->website) != 0) {
+    	ocall_print(iterator->website);
     	iterator = iterator->next;
+    	//TODO: Bug is that after you serialize, the iterator->next should be null, instead the iterator->next->website is null
+
+
+
     }
     if (iterator == NULL) {
+
     	*returnstr = '\0';
     	return -1;
     }
