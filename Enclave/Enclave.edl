@@ -11,6 +11,7 @@ enclave {
         public int get_password([in, string] char* website, [out, size=16] char* returnstr, [in, string] char* verification_password);
         public int serialize_key_store([out, size=70] void* p_dst);
         public int decrypt_and_set_key_store([in, size=70] void* key_store);
+        public int encrypt_and_serialize_key_store([out, size=70] void* p_dst);
 
     };
 

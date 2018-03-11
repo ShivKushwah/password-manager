@@ -36,12 +36,10 @@ int main(int argc, char const *argv[]) {
     int encrypt_return;
     void* encrypt = malloc(100);
 
-    sgx_status_t status4 = serialize_key_store(global_eid, &encrypt_return, encrypt);
-    //printf("DUUUUDE");
+    sgx_status_t status4 = encrypt_and_serialize_key_store(global_eid, &encrypt_return, encrypt);
 
     printf("serialize_key_store returned: %u\n", encrypt_return);
     printf("serialize_key_store string: %s\n", (char*) encrypt);
-    //ocall_print((char*) encrypt);
 
     
 
@@ -77,7 +75,6 @@ int main(int argc, char const *argv[]) {
     sgx_status_t status333 = get_password(global_eid, &get_password_return, website2, get_password_return_str, main_password);
     printf("get_password returned: %u\n", get_password_return);
     printf("get_password buffer: %s\n", get_password_return_str); 
-    //TODO: This decrypt_and_set_key_store doesn't work
 
 
 

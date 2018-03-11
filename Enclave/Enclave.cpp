@@ -5,6 +5,8 @@
 
 const unsigned MAX_PASSWORD_SIZE = 1024; 
 
+//NOTE: if you run into bus error, edit enclave.edl and modify the parameter lengths for strings
+
 char* password; //main password for entire keystore
 int numPasswords = 0;
 
@@ -102,21 +104,19 @@ int get_password(char* website, char* returnstr, char* verification_password) {
 
     KeyStoreBank* iterator = firstKey;
     while (iterator != NULL && iterator->next != NULL && strcmp(website, iterator->website) != 0) {
-    	//ocall_print(iterator->website);
     	iterator = iterator->next;
-    	//TODO: Bug is that after you serialize, the iterator->next should be null, instead the iterator->next->website is null
 
 
 
     }
     if (iterator == NULL || iterator->next == NULL) {
-    	ocall_print("breh");
     	*returnstr = '\0';
     	return -1;
     }
     strncpy(returnstr, iterator->password, strlen(iterator->password));
 
     unsigned char var[3] = "hi";
+    //TODO remove this readrand code
 
     sgx_read_rand(var, 2);
 
@@ -170,6 +170,69 @@ void dumb_mem_cpy(void* dst, void* toCopy, int size) {
 		iterator1++;
 		iterator2++;
 	}
+
+}
+
+int encrypt_and_serialize_key_store(void* p_dst) {
+
+	//const unsigned char (*key) [16] = reinterpret_cast<const unsigned char*>("aaaaaaaaaaaaaaa");//{}; //"aaaaaaaaaaaaaaaa";
+	//*key = "a";
+	static sgx_aes_ctr_128bit_key_t g_region_key;
+	//ocall_print((char*) g_region_key);
+	uint8_t key[16] = "abshsydgsvsgshs";
+	memcpy(g_region_key, key, sizeof(key));
+	//ocall_print((char*) g_region_key);
+
+	//uint8_t plain[4 + 4 + 16 + 32] = { 0 };
+
+	uint8_t blob[1024] = { 0 };
+	//ocall_print((char*) blob);
+	if(sgx_read_rand(blob, 12))
+		return -1;
+	//ocall_print((char*) blob);
+
+
+
+
+	//const uint8_t random[] = "abcdefidkdji";
+
+	//ocall_print("OHOH");
+	//ocall_print((char *) p_dst);
+	serialize_key_store(p_dst);
+	//ocall_print((char *) p_dst);
+	uint8_t* output = (uint8_t*) malloc(binn_size(p_dst));
+	int sizeP = binn_size(p_dst);
+
+	ocall_print("ye");
+	ocall_print((char*)output);
+
+
+	//todo:could be the const iunit8 cast to p_dst that is messing things up since if there  a null terminator in  it
+	//sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), (uint8_t*) output, random,12, NULL, 0, NULL);
+	sgx_status_t status = sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), (uint8_t*) output, blob, 12, NULL, 0, (sgx_aes_gcm_128bit_tag_t *) (blob + 12));
+	
+	//sgx_status_t status = sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), blob + 12 + SGX_AESGCM_MAC_SIZE, blob, 12, NULL, 0,  (sgx_aes_gcm_128bit_tag_t *) (blob + 12));
+
+
+	if (status != SGX_SUCCESS) {
+		ocall_print("dude it failed");
+		return -1;
+	}
+
+	//memcpy
+
+	//p_dst = malloc(binn_size(p_dst));
+
+	//sgx_rijndael128GCM_decrypt(&g_region_key, output, binn_size(p_dst), (uint8_t*) p_dst, blob, 12, NULL, 0, NULL);
+
+	ocall_print((char*) output);
+	memcpy(p_dst, output, sizeP);
+
+	return 0;
+
+	//char* temp = binn_object_str((void*) p_dst, string_integer_concat("website", 0));
+	//ocall_print(temp);
+
 
 }
 
