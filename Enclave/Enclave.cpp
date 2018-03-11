@@ -177,45 +177,26 @@ void dumb_mem_cpy(void* dst, void* toCopy, int size) {
 
 int encrypt_and_serialize_key_store(void* p_dst) {
 
-	//const unsigned char (*key) [16] = reinterpret_cast<const unsigned char*>("aaaaaaaaaaaaaaa");//{}; //"aaaaaaaaaaaaaaaa";
-	//*key = "a";
 	static sgx_aes_ctr_128bit_key_t g_region_key;
-	//ocall_print((char*) g_region_key);
 	uint8_t key[16] = "abshsydgsvsgshs";
 	memcpy(g_region_key, key, sizeof(key));
-	//ocall_print((char*) g_region_key);
 
-	//uint8_t plain[4 + 4 + 16 + 32] = { 0 };
 
 	uint8_t blob[1024] = { 0 };
-	//ocall_print((char*) blob);
 	if(sgx_read_rand(blob, 12))
 		return -1;
-	//ocall_print((char*) blob);
 
-
-
-
-	//const uint8_t random[] = "abcdefidkdji";
-
-	//ocall_print("OHOH");
-	//ocall_print((char *) p_dst);
 	serialize_key_store(p_dst);
-	//ocall_print((char *) p_dst);
 	uint8_t* output = (uint8_t*) malloc(binn_size(p_dst));
 	int sizeP = binn_size(p_dst);
 
-	ocall_print("ye");
-	ocall_print((char*)output);
+	//ocall_print((char*)output);
 
 
-	//todo:could be the const iunit8 cast to p_dst that is messing things up since if there  a null terminator in  it
-	//sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), (uint8_t*) output, random,12, NULL, 0, NULL);
 	sgx_status_t status = sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), (uint8_t*) output, blob, 12, NULL, 0, (sgx_aes_gcm_128bit_tag_t *) (blob + 12));
 	
-	//sgx_status_t status = sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), blob + 12 + SGX_AESGCM_MAC_SIZE, blob, 12, NULL, 0,  (sgx_aes_gcm_128bit_tag_t *) (blob + 12));
-	//breh = blob;
-	memcpy(buffer, blob, 1024);
+
+	memcpy(buffer, blob, 1024); //save blob for decryption purposes
 
 
 	if (status != SGX_SUCCESS) {
@@ -223,45 +204,19 @@ int encrypt_and_serialize_key_store(void* p_dst) {
 		return -1;
 	}
 
-	//memcpy
 
-	//p_dst = malloc(binn_size(p_dst));
-
-	//sgx_rijndael128GCM_decrypt(&g_region_key, output, binn_size(p_dst), (uint8_t*) p_dst, blob, 12, NULL, 0, NULL);
-
-	ocall_print((char*) output);
+	//ocall_print((char*) output);
 	memcpy(p_dst, output, sizeP);
-	ocall_print(itoa(sizeP,10));
+	//ocall_print(itoa(sizeP,10));
 
 	return 0;
 
-	//char* temp = binn_object_str((void*) p_dst, string_integer_concat("website", 0));
-	//ocall_print(temp);
 
 
 }
 
 int serialize_key_store(void* p_dst) {
-	/*
-	void* key_store =  malloc(numPasswords * sizeof(struct KeyStoreBank)); 
-	//ocall_print((char*) key_store);
 
-	size_t currentByte = 0;
-	KeyStoreBank* key = firstKey;
-
-	while (key->next != NULL) {
-		memcpy((char*)key_store + currentByte, key, sizeof(struct KeyStoreBank)); //problem is you are copying the string pointers, not the actual values of the pointers.
-		key = key->next;
-		currentByte = currentByte + sizeof(struct KeyStoreBank);
-	}
-
-	//ocall_print((char*) key_store);
-	//ocall_print(itoa(currentByte, 10));
-	memcpy(p_dst, key_store, currentByte);
-
-	return 0;
-	*/
-	//ocall_print("helo");
 	binn* obj = binn_object();
 	KeyStoreBank* key = firstKey;
 	int i = 0;
@@ -273,19 +228,8 @@ int serialize_key_store(void* p_dst) {
 		i++;
 	}
 	
-	//binn_object_set_str(obj, "website0", key->website);
-	//binn_object_set_int32(obj, "password0", 32);
-	//binn_object_set_str(obj, "website1", key->password);
-
-	//ocall_print((char*) p_dst);
-	//ocall_print(itoa(binn_size(obj), 10));
-
-	//char* dude = binn_object_str(obj, "website0");
-	//ocall_print("hope this works1");
-	//ocall_print(dude);
 
 	memcpy(p_dst, binn_ptr(obj), binn_size(obj));
-	//ocall_print((char *) p_dst);
 
 	binn_free(obj);
 
@@ -298,66 +242,24 @@ int serialize_key_store(void* p_dst) {
 
 
 int decrypt_and_set_key_store(void* key_store) {
-	/*
-	//this should only work for 1 key in the key_store
-
+	
 	//need to call free
-	firstKey = (KeyStoreBank*) malloc(sizeof(struct KeyStoreBank));
-	memcpy(firstKey, key_store, sizeof(struct KeyStoreBank));
-	ocall_print((char* )firstKey->next);
-	return 0;
-	*/
-	//ocall_print((char*) key_store);
 
-	//need to call free
+	//todo: figure out buffer serializing over encalve close, and somehow need to transmit sizeP
 
 	
 	static sgx_aes_ctr_128bit_key_t g_region_key;
-	//ocall_print((char*) g_region_key);
 	uint8_t key[16] = "abshsydgsvsgshs";
 	memcpy(g_region_key, key, sizeof(key));
-	//ocall_print((char*) g_region_key);
-
-	//uint8_t plain[4 + 4 + 16 + 32] = { 0 };
-
-	uint8_t blob[1024] = { 0 };
-	//ocall_print((char*) blob);
-	if(sgx_read_rand(blob, 12))
-		return -1;
-	//ocall_print((char*) blob);
-
-
-
-
-	//const uint8_t random[] = "abcdefidkdji";
-
-	//ocall_print("OHOH");
-	//ocall_print((char *) p_dst);
-
-	//ocall_print((char *) p_dst);
 	int sizeP = 35;
 	uint8_t* decrypted_output = (uint8_t*) malloc(sizeP);
 
-	ocall_print("ye");
-	//ocall_print((char*)output);
 
-	ocall_print("Breh");
-	ocall_print((char*) buffer);
-
-
-	//problem may be that we need the same blob
-	//sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), (uint8_t*) output, random,12, NULL, 0, NULL);
-	//sgx_status_t status = sgx_rijndael128GCM_decrypt(&g_region_key, (const uint8_t*) key_store, sizeP, (uint8_t*) decrypted_output, blob, 12, NULL, 0, (sgx_aes_gcm_128bit_tag_t *) (blob + 12));
 	sgx_status_t status = sgx_rijndael128GCM_decrypt(&g_region_key, (const uint8_t*) key_store, sizeP, (uint8_t*) decrypted_output, buffer, 12, NULL, 0, (sgx_aes_gcm_128bit_tag_t *) (buffer + 12));
 
 
-
-
-
-
-
 	if (status != SGX_SUCCESS) {
-		ocall_print("dude it failed");
+		ocall_print("Failed");
 		return -1;
 	}
 
@@ -385,10 +287,6 @@ int decrypt_and_set_key_store(void* key_store) {
     	
     	temp = binn_object_str(key_store, string_integer_concat("website", i));
     }
-
-	//char* password = binn_object_str(key_store, string_integer_concat("website", 0));
-	//ocall_print("hope this works");
-	//ocall_print(password);
 
 
 }
