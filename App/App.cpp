@@ -76,6 +76,11 @@ int main(int argc, char const *argv[]) {
     printf("get_password returned: %u\n", get_password_return);
     printf("get_password buffer: %s\n", get_password_return_str); 
 
+    //get pass 1 (should be able to find)
+    status3 = get_password(global_eid, &get_password_return, website, get_password_return_str, main_password);
+    printf("get_password returned: %u\n", get_password_return);
+    printf("get_password buffer: %s\n", get_password_return_str);
+
 
 
 
