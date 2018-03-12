@@ -2,6 +2,7 @@
 #include <string.h>
 #include "sgx_trts.h"
 #include <binn/binn.h>
+#include <scrypt/crypto_scrypt.h>
 
 const unsigned MAX_PASSWORD_SIZE = 1024; 
 
