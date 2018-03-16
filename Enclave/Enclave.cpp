@@ -123,6 +123,25 @@ int get_password(char* website, char* returnstr, char* verification_password) {
 
     sgx_read_rand(var, 2);
 
+    ocall_print("DUUDE");
+    const uint8_t* passwd = (const uint8_t*) "password";
+    size_t passwdlen = 8;
+    const uint8_t * salt = (const uint8_t*) "salt";
+    size_t saltlen = 4;
+    uint8_t * buf = (uint8_t *) malloc(1024 * sizeof(char));
+    size_t buflen = 1024;
+    uint64_t N = 8;
+    uint32_t _r = 30;
+    uint32_t _p = 20;
+    ocall_print("yoo");
+
+
+
+
+    crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p, buf, buflen);
+
+
+
    // sgx_rijndael128GCM_encrypt()
 
     return 0;
