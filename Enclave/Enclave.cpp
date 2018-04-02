@@ -136,9 +136,11 @@ int get_password(char* website, char* returnstr, char* verification_password) {
     ocall_print("yoo");
 
 
-
-
-    crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p, buf, buflen);
+    if (buf == NULL) {
+        ocall_print("TROUBLE!\n");
+    } else {
+        crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p, buf, buflen);
+    }
     // do_something();
 
 

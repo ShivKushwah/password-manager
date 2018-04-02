@@ -7,6 +7,10 @@
 
 #include "sha256.h"
 
+#include "Enclave_t.h"
+#include "sgx_trts.h"
+#include <stdio.h>
+
 /*
  * Encode a length len/4 vector of (uint32_t) into a length len vector of
  * (uint8_t) in big-endian form.  Assumes len is a multiple of 4.
@@ -510,6 +514,8 @@ PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
 	int k;
 	size_t clen;
 
+    ocall_print("PBKDF2_SHA256:Checkpoint 1\n");
+
 	/* Sanity-check. */
 	assert(dkLen <= 32 * (size_t)(UINT32_MAX));
 
@@ -517,19 +523,31 @@ PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
 	_HMAC_SHA256_Init(&Phctx, passwd, passwdlen,
 	    tmp32, &tmp8[0], &tmp8[64]);
 
+    ocall_print("PBKDF2_SHA256:Checkpoint 2\n");
+
 	/* Compute HMAC state after processing P and S. */
 	memcpy(&PShctx, &Phctx, sizeof(HMAC_SHA256_CTX));
 	_HMAC_SHA256_Update(&PShctx, salt, saltlen, tmp32);
 
+    ocall_print("PBKDF2_SHA256:Checkpoint 3\n");
+
 	/* Iterate through the blocks. */
 	for (i = 0; i * 32 < dkLen; i++) {
+        char buffer[1024];
+        buffer[1023] = '\0';
+        snprintf(buffer, 1023, "PBKDF2:Iteration[%d]\n", i);
+        ocall_print(buffer);
+
 		/* Generate INT(i + 1). */
 		be32enc(ivec, (uint32_t)(i + 1));
+
 
 		/* Compute U_1 = PRF(P, S || INT(i)). */
 		memcpy(&hctx, &PShctx, sizeof(HMAC_SHA256_CTX));
 		_HMAC_SHA256_Update(&hctx, ivec, 4, tmp32);
 		_HMAC_SHA256_Final(U, &hctx, tmp32, tmp8);
+
+        ocall_print("--> PBKDF2_SHA256:Checkpoint 3.2\n");
 
 		/* T_i = U_1 ... */
 		memcpy(T, U, 32);
@@ -545,12 +563,18 @@ PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
 				T[k] ^= U[k];
 		}
 
+        ocall_print("--> PBKDF2_SHA256:Checkpoint 3.3\n");
+
 		/* Copy as many bytes as necessary into buf. */
 		clen = dkLen - i * 32;
 		if (clen > 32)
 			clen = 32;
 		memcpy(&buf[i * 32], T, clen);
+
+        ocall_print("--> PBKDF2_SHA256:Checkpoint 3.4\n");
 	}
+
+    ocall_print("PBKDF2_SHA256:Checkpoint 4\n");
 
 	/* Clean the stack. */
 	insecure_memzero(&Phctx, sizeof(HMAC_SHA256_CTX));

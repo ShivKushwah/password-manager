@@ -76,7 +76,8 @@ _crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 
 	V = (uint32_t *)(V0);
 
-
+    
+    ocall_print("P1.\n");
 
 	/* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */
 	PBKDF2_SHA256(passwd, passwdlen, salt, saltlen, 1, B, p * 128 * r);
@@ -119,6 +120,7 @@ crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
     const uint8_t * salt, size_t saltlen, uint64_t N, uint32_t _r, uint32_t _p,
     uint8_t * buf, size_t buflen)
 {
+    ocall_print("entering crypto_scrypt.\n");
 	return (_crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p,
 	    buf, buflen, crypto_scrypt_smix));
 }
