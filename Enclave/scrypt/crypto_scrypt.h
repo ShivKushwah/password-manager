@@ -44,4 +44,9 @@
 int crypto_scrypt(const uint8_t *, size_t, const uint8_t *, size_t, uint64_t,
     uint32_t, uint32_t, uint8_t *, size_t);
 
+/*
+ * Test call.
+ */
+int do_something();
+
 #endif /* !_CRYPTO_SCRYPT_H_ */

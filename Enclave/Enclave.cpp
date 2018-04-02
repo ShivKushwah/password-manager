@@ -139,6 +139,7 @@ int get_password(char* website, char* returnstr, char* verification_password) {
 
 
     crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p, buf, buflen);
+    // do_something();
 
 
 

@@ -28,6 +28,7 @@
  */
 //#include "scrypt_platform.h"
 
+#include "Enclave_t.h"
 #include <sys/types.h>
 //#include <sys/mman.h>
 
@@ -97,7 +98,11 @@ _crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 
 
 
-
+int
+do_something()
+{
+    ocall_print("doing something.");
+}
 
 
 /**
