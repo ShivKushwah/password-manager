@@ -578,10 +578,18 @@ PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
 
 	/* Clean the stack. */
 	insecure_memzero(&Phctx, sizeof(HMAC_SHA256_CTX));
+	ocall_print("PBKDF2_SHA256:Checkpoint 5\n");
 	insecure_memzero(&PShctx, sizeof(HMAC_SHA256_CTX));
+	ocall_print("PBKDF2_SHA256:Checkpoint 6\n");
 	insecure_memzero(&hctx, sizeof(HMAC_SHA256_CTX));
+	ocall_print("PBKDF2_SHA256:Checkpoint 7\n");
 	insecure_memzero(tmp32, 288);
+	ocall_print("PBKDF2_SHA256:Checkpoint 8\n");
 	insecure_memzero(tmp8, 96);
+	ocall_print("PBKDF2_SHA256:Checkpoint 9\n");
 	insecure_memzero(U, 32);
+	ocall_print("PBKDF2_SHA256:Checkpoint 10\n");
 	insecure_memzero(T, 32);
+	ocall_print("Exited PBKDF2_SHA256\n");
+
 }
