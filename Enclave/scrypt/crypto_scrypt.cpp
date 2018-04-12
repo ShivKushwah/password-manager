@@ -112,12 +112,12 @@ _crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 	uint32_t i;
 
 	/* Sanity-check parameters. */
-#if SIZE_MAX > UINT32_MAX
+// #if SIZE_MAX > UINT32_MAX
 	if (buflen > (((uint64_t)(1) << 32) - 1) * 32) {
 		errno = EFBIG;
 		goto err0;
 	}
-#endif
+// #endif
 	if ((uint64_t)(r) * (uint64_t)(p) >= (1 << 30)) {
 		errno = EFBIG;
 		goto err0;
@@ -156,9 +156,9 @@ _crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 		goto err1;
 	XY = (uint32_t *)(((uintptr_t)(XY0) + 63) & ~ (uintptr_t)(63));
 
-	// if ((V0 = malloc(128 * r * N + 63)) == NULL)
-	// 	goto err2;
-	// V = (uint32_t *)(((uintptr_t)(V0) + 63) & ~ (uintptr_t)(63));
+	if ((V0 = malloc(128 * r * N + 63)) == NULL)
+		goto err2;
+	V = (uint32_t *)(((uintptr_t)(V0) + 63) & ~ (uintptr_t)(63));
 
 
 	// if ((V0 = mmap(NULL, (size_t)(128 * r * N), PROT_READ | PROT_WRITE,
@@ -166,7 +166,7 @@ _crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 	//     MAP_ANON | MAP_PRIVATE,
 	//     -1, 0)) == MAP_FAILED)
 	// 	goto err2;
-	V = (uint32_t *)(V0);
+	// V = (uint32_t *)(V0);
 
 
 	/* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */
