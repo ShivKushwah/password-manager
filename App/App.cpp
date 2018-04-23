@@ -30,6 +30,20 @@ int main(int argc, char const *argv[]) {
     socket.bind ("tcp://*:5555");
     std::cout << "Received Hello" << std::endl;
 
+    char str[100];
+    char str2[100];
+   int i;
+
+   printf( "Enter a command :");
+   scanf("%s %s", str, str2);
+   if (strcmp(str, "create_keystore") == 0) {
+    printf("sup dawg");
+   }
+
+   printf( "\nYou entered: %s %d ", str, i);
+
+   
+
 
   
 

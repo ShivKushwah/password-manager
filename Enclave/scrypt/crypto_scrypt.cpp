@@ -177,8 +177,8 @@ _crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 		/* 3: B_i <-- MF(B_i, N) */
 		char buffer[1024];
         buffer[1023] = '\0';
-        snprintf(buffer, 1023, "crypto_scrypt:checkpoint 10: Iteration[%d]\n", i);
-        ocall_print(buffer);
+        //snprintf(buffer, 1023, "crypto_scrypt:checkpoint 10: Iteration[%d]\n", i);
+        //ocall_print(buffer);
 
         //error here
 		(smix)(&B[i * 128 * r], r, N, V, XY);
