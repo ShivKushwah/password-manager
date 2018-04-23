@@ -1,8 +1,13 @@
 #include <stdio.h>
+#include <zmq.hpp>
 #include <iostream>
 #include "Enclave_u.h"
 #include "sgx_urts.h"
 #include "sgx_utils/sgx_utils.h"
+#include <string>
+
+#include <unistd.h>
+
 
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
@@ -13,10 +18,19 @@ void ocall_print(const char* str) {
 }
 
 int main(int argc, char const *argv[]) {
+
+
     if (initialize_enclave(&global_eid, "enclave.token", "enclave.signed.so") < 0) {
         std::cout << "Fail to initialize enclave." << std::endl;
         return 1;
     }
+
+    zmq::context_t context (1);
+    zmq::socket_t socket (context, ZMQ_REP);
+    socket.bind ("tcp://*:5555");
+    std::cout << "Received Hello" << std::endl;
+
+
   
 
     char main_password[] = "password";
