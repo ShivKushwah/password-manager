@@ -30,37 +30,78 @@ int main(int argc, char const *argv[]) {
     socket.bind ("tcp://*:5555");
     std::cout << "Received Hello" << std::endl;
 
-    char str[100];
+    while (true) {
+
+
+
+    char str1[100];
     char str2[100];
+    char str3[100];
+    char str4[100];
    int i;
 
    printf( "Enter a command :");
-   scanf("%s %s", str, str2);
-   if (strcmp(str, "create_keystore") == 0) {
-    printf("sup dawg");
+   // fgets(str, 10, stdin);
+   //  /* remove newline, if present */
+   //  i = strlen(str)-1;
+   //  if( str[ i ] == '\n') 
+   //      str[i] = '\0';
+
+   scanf("%s %s %s %s", str1, str2, str3, str4);
+   if (strcmp(str1, "create_keystore") == 0) {
+    printf("Creating Password Manager");
+
+    //str2 = main keystore password
+    int create_keystore_return;
+    sgx_status_t status = create_keystore(global_eid, &create_keystore_return, str2);
+
+   } else if (strcmp(str1, "add_password") == 0) {
+    printf("Adding Password");
+
+     //add pass1
+    int add_password_return;
+    // strings are const char* ptrs in modern C/C++ compilers
+    //char password[] = "pass1";
+    //char website[] = "web1";
+
+    //str2 = website
+    //str3 = password
+    sgx_status_t status2 = add_password(global_eid, &add_password_return, str2, str3);
+    printf("add_password returned: %u\n", add_password_return);
+
+
+   } else if (strcmp(str1, "get_password") == 0) {
+    printf("Getting Password");
+
+    char get_password_return_str[16];
+    int get_password_return;
+    //str2 = website
+    //str3 = main keystore password
+    sgx_status_t status3 = get_password(global_eid, &get_password_return, str2, get_password_return_str, str3);
+    printf("get_password returned: %u\n", get_password_return);
+    printf("get_password buffer: %s\n", get_password_return_str);
+
    }
 
-   printf( "\nYou entered: %s %d ", str, i);
+    }
 
    
 
 
   
 
-    char main_password[] = "password";
-    int create_keystore_return;
-    sgx_status_t status = create_keystore(global_eid, &create_keystore_return, main_password);
+    
 
-
-    //add pass1
-    int add_password_return;
-    // strings are const char* ptrs in modern C/C++ compilers
-    char password[] = "pass1";
-    char website[] = "web1";
-    sgx_status_t status2 = add_password(global_eid, &add_password_return, website, password);
-    printf("add_password returned: %u\n", add_password_return);
+    // //add pass1
+    // int add_password_return;
+    // // strings are const char* ptrs in modern C/C++ compilers
+    // char password[] = "pass1";
+    // char website[] = "web1";
+    // sgx_status_t status2 = add_password(global_eid, &add_password_return, website, password);
+    // printf("add_password returned: %u\n", add_password_return);
 
     //serialize the keystore
+    /*
     int encrypt_return;
     void* encrypt = malloc(100);
 
@@ -141,7 +182,7 @@ int main(int argc, char const *argv[]) {
     }
 
     //printf("Random number: %d\n", ptr);
-    
+    */
 
     /*
 
@@ -172,4 +213,5 @@ int main(int argc, char const *argv[]) {
     */
 
     return 0;
+
 }
