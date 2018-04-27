@@ -39,6 +39,7 @@ int main(int argc, char const *argv[]) {
     char str3[100];
     char str4[100];
    int i;
+   void* encrypt = malloc(100);
 
    printf( "Enter a command :");
    // fgets(str, 10, stdin);
@@ -48,7 +49,7 @@ int main(int argc, char const *argv[]) {
    //      str[i] = '\0';
 
    scanf("%s %s %s %s", str1, str2, str3, str4);
-   if (strcmp(str1, "create_keystore") == 0) {
+   if (strcmp(str1, "create") == 0) {
     printf("Creating Password Manager");
 
     //str2 = main keystore password
@@ -81,6 +82,39 @@ int main(int argc, char const *argv[]) {
     printf("get_password returned: %u\n", get_password_return);
     printf("get_password buffer: %s\n", get_password_return_str);
 
+   } else if (strcmp(str1, "encrypt") == 0) {
+    printf("Serializing Keystore");
+
+     int encrypt_return;
+    //void* encrypt = malloc(100);
+    //save to file
+    FILE *fp = fopen("encrypt.txt", "w+");
+    
+
+    sgx_status_t status4 = encrypt_and_serialize_key_store(global_eid, &encrypt_return, encrypt);
+    fprintf (fp, "%s", encrypt);
+    fclose(fp);
+    printf("serialize_key_store returned: %u\n", encrypt_return);
+    printf("serialize_key_store string: %s\n", (char*) encrypt);
+   } else if (strcmp(str1, "decrypt") == 0) {
+    printf("Decrypting and Setting Keystore");
+
+    //void* encrypt = malloc(100);
+    int encrypt_return;
+    // size_t nread;
+
+    // FILE *file = fopen("encrypt.txt", "r");
+    // if (file) {
+    //     while ((nread = fread(encrypt, 1, sizeof encrypt, file)) > 0)
+    //         fwrite(encrypt, 1, nread, stdout);
+    //     if (ferror(file)) {
+    //         /* deal with error */
+    //     }
+    //     fclose(file);
+    // }
+    printf("encrypted string %s", encrypt);
+    sgx_status_t status5 = decrypt_and_set_key_store(global_eid, &encrypt_return, encrypt);
+
    }
 
     }
@@ -89,19 +123,21 @@ int main(int argc, char const *argv[]) {
 
 
   
+    char main_password[] = "password";
+    int create_keystore_return;
+    sgx_status_t status = create_keystore(global_eid, &create_keystore_return, main_password);
 
-    
 
     // //add pass1
-    // int add_password_return;
-    // // strings are const char* ptrs in modern C/C++ compilers
-    // char password[] = "pass1";
-    // char website[] = "web1";
-    // sgx_status_t status2 = add_password(global_eid, &add_password_return, website, password);
-    // printf("add_password returned: %u\n", add_password_return);
+    int add_password_return;
+    // strings are const char* ptrs in modern C/C++ compilers
+    char password[] = "pass1";
+    char website[] = "web1";
+    sgx_status_t status2 = add_password(global_eid, &add_password_return, website, password);
+    printf("add_password returned: %u\n", add_password_return);
 
     //serialize the keystore
-    /*
+    
     int encrypt_return;
     void* encrypt = malloc(100);
 
@@ -182,7 +218,7 @@ int main(int argc, char const *argv[]) {
     }
 
     //printf("Random number: %d\n", ptr);
-    */
+    
 
     /*
 

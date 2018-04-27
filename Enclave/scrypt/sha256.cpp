@@ -571,7 +571,7 @@ PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
 			clen = 32;
 		memcpy(&buf[i * 32], T, clen);
 
-       // ocall_print("--> PBKDF2_SHA256:Checkpoint 3.4\n");
+        //ocall_print("--> PBKDF2_SHA256:Checkpoint 3.4\n");
 	}
 
     //ocall_print("PBKDF2_SHA256:Checkpoint 4\n");
