@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <zmq.hpp>
+//#include <zmq.hpp>
 #include <iostream>
 #include "Enclave_u.h"
 #include "sgx_urts.h"
@@ -25,10 +25,10 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    zmq::context_t context (1);
-    zmq::socket_t socket (context, ZMQ_REP);
-    socket.bind ("tcp://*:5555");
-    std::cout << "Received Hello" << std::endl;
+   // zmq::context_t context (1);
+   // zmq::socket_t socket (context, ZMQ_REP);
+   // socket.bind ("tcp://*:5555");
+   // std::cout << "Received Hello" << std::endl;
 
     while (true) {
 
