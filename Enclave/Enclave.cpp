@@ -65,8 +65,6 @@ int add_password(char* website, char* password) {
     strncpy(currentKey->password, password, password_len);
     strncpy(currentKey->website, website, website_len);
 
-    ocall_print("Adding password.");
-
     KeyStoreBank* newKey = (KeyStoreBank*) malloc(sizeof(struct KeyStoreBank));
     currentKey->next = newKey;
     currentKey = newKey;
@@ -75,29 +73,11 @@ int add_password(char* website, char* password) {
 
     // return value = 0 means success.
     return 0;
-	/*
-    size_t password_len = strlen(password);
-    if (password_len >= MAX_PASSWORD_SIZE) {
-        // fail if password greater than a particular size.
-        return -1;
-    }
-    buffer_size = password_len + 1;
-    secret = static_cast<char*>(malloc(buffer_size));
-    buffer = static_cast<char*>(malloc(buffer_size));
-    // abort on out of memory.
-    if (secret == NULL || buffer == NULL) { abort(); }
 
-    ocall_print("Adding password.");
-    strncpy(secret, password, buffer_size);
-    encrypt(secret);
-
-    // return value = 0 means success.
-    return 0;
-    */
 }
 
 int get_password(char* website, char* returnstr, char* verification_password) {
-    ocall_print("Returning password.");
+    ocall_print("Returning Password\n");
     size_t website_len = strlen(website);
 
     if (strcmp(verification_password, password) != 0) {
@@ -123,7 +103,6 @@ int get_password(char* website, char* returnstr, char* verification_password) {
 
     sgx_read_rand(var, 2);
 
-    ocall_print("DUUDE");
     const uint8_t* passwd = (const uint8_t*) "password";
     size_t passwdlen = 8;
     const uint8_t * salt = (const uint8_t*) "salt";
@@ -133,17 +112,13 @@ int get_password(char* website, char* returnstr, char* verification_password) {
     uint64_t N = 8;
     uint32_t _r = 30;
     uint32_t _p = 20;
-    ocall_print("yoo");
 
 
     if (buf == NULL) {
-        ocall_print("TROUBLE!\n");
+        ocall_print("Buffer Error\n");
     } else {
         crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p, buf, buflen);
     }
-    // do_something();
-
-
 
    // sgx_rijndael128GCM_encrypt()
 
@@ -202,6 +177,7 @@ int encrypt_and_serialize_key_store(void* p_dst) {
 
 	static sgx_aes_ctr_128bit_key_t g_region_key;
 	uint8_t key[16] = "abshsydgsvsgshs";
+	//TODO make this key a pbkdf of masterpassword, and use that in deserialization as well 
 	memcpy(g_region_key, key, sizeof(key));
 
 
@@ -212,8 +188,6 @@ int encrypt_and_serialize_key_store(void* p_dst) {
 	serialize_key_store(p_dst);
 	uint8_t* output = (uint8_t*) malloc(binn_size(p_dst));
 	int sizeP = binn_size(p_dst);
-
-	//ocall_print((char*)output);
 
 
 	sgx_status_t status = sgx_rijndael128GCM_encrypt(&g_region_key, (const uint8_t*) p_dst, binn_size(p_dst), (uint8_t*) output, blob, 12, NULL, 0, (sgx_aes_gcm_128bit_tag_t *) (blob + 12));
@@ -228,9 +202,7 @@ int encrypt_and_serialize_key_store(void* p_dst) {
 	}
 
 
-	//ocall_print((char*) output);
 	memcpy(p_dst, output, sizeP);
-	//ocall_print(itoa(sizeP,10));
 
 	return 0;
 

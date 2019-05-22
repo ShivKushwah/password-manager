@@ -91,7 +91,7 @@ int main(int argc, char const *argv[])
         }
         else if (strcmp(str1, "get") == 0)
         {
-            printf("Getting Password");
+            printf("Getting Password\n");
 
             char get_password_return_str[16];
             int get_password_return;
